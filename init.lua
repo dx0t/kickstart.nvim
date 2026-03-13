@@ -83,6 +83,8 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('n', '<A-j>', '<cmd>cnext<CR>', { desc = 'Go to next item in quicklist' })
 vim.keymap.set('n', '<A-k>', '<cmd>cprev<CR>', { desc = 'Go to prev item in quicklist' })
+vim.keymap.set('n', '<A-i>', '<cmd>lnext<CR>', { desc = 'Next list item' })
+vim.keymap.set('n', '<A-u>', '<cmd>lprev<CR>', { desc = 'Prev list item' })
 
 -- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
