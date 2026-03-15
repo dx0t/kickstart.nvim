@@ -3,7 +3,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
-vim.cmd 'language en_US'
+--vim.cmd 'language en_US'
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
@@ -83,8 +83,8 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('n', '<A-j>', '<cmd>cnext<CR>', { desc = 'Go to next item in quicklist' })
 vim.keymap.set('n', '<A-k>', '<cmd>cprev<CR>', { desc = 'Go to prev item in quicklist' })
-vim.keymap.set('n', '<A-i>', '<cmd>lnext<CR>', { desc = 'Next list item' })
-vim.keymap.set('n', '<A-u>', '<cmd>lprev<CR>', { desc = 'Prev list item' })
+vim.keymap.set('n', '<A-u>', '<cmd>lnext<CR>', { desc = 'Next list item' })
+vim.keymap.set('n', '<A-i>', '<cmd>lprev<CR>', { desc = 'Prev list item' })
 
 -- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
