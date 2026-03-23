@@ -668,7 +668,11 @@ require('lazy').setup({
     end,
   },
 
-  -- Highlight todo, notes, etc in comments
+  {
+    'numToStr/Comment.nvim',
+    opts = {},
+  },
+
   {
     'folke/todo-comments.nvim',
     event = 'VimEnter',
