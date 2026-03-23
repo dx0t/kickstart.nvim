@@ -85,6 +85,17 @@ vim.keymap.set('n', '<A-j>', '<cmd>cnext<CR>', { desc = 'Go to next item in quic
 vim.keymap.set('n', '<A-k>', '<cmd>cprev<CR>', { desc = 'Go to prev item in quicklist' })
 vim.keymap.set('n', '<A-u>', '<cmd>lnext<CR>', { desc = 'Next list item' })
 vim.keymap.set('n', '<A-i>', '<cmd>lprev<CR>', { desc = 'Prev list item' })
+vim.keymap.set(
+  'n',
+  '<leader>td',
+  function()
+    require('todo-comments.search').setqflist {
+      keywords = 'TODO_DT,TODO DT,TODO dt,todo dt,fixme',
+      open = true,
+    }
+  end,
+  { desc = 'Open [T]ODO [D]T quickfix list' }
+)
 
 -- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
@@ -680,7 +691,25 @@ require('lazy').setup({
     ---@module 'todo-comments'
     ---@type TodoOptions
     ---@diagnostic disable-next-line: missing-fields
-    opts = { signs = false },
+    opts = {
+      signs = false,
+      highlight = {
+        keyword = 'bg',
+        pattern = [[.*<(KEYWORDS)\s*:?]],
+      },
+      search = {
+        pattern = [[\b(KEYWORDS)\b:?]],
+      },
+      keywords = {
+        TODO_DT = { icon = ' ', color = '#FF8800', alt = { 'TODO DT', 'TODO dt', 'todo dt', 'fixme' } },
+        TODO = { icon = ' ', color = 'info' },
+        HACK = { icon = ' ', color = 'warning' },
+        WARN = { icon = ' ', color = 'warning', alt = { 'WARNING', 'XXX' } },
+        PERF = { icon = ' ', alt = { 'OPTIM', 'PERFORMANCE', 'OPTIMIZE' } },
+        NOTE = { icon = ' ', color = 'hint', alt = { 'INFO' } },
+        TEST = { icon = '⏲ ', color = 'test', alt = { 'TESTING', 'PASSED', 'FAILED' } },
+      },
+    },
   },
 
   { -- Collection of various small independent plugins/modules
