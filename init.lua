@@ -778,6 +778,7 @@ require('lazy').setup({
       local parsers = {
         'bash',
         'c',
+        'c_sharp',
         'diff',
         'html',
         'javascript',
