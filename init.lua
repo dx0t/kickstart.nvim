@@ -85,6 +85,11 @@ vim.keymap.set('n', '<A-j>', '<cmd>cnext<CR>', { desc = 'Go to next item in quic
 vim.keymap.set('n', '<A-k>', '<cmd>cprev<CR>', { desc = 'Go to prev item in quicklist' })
 vim.keymap.set('n', '<A-u>', '<cmd>lnext<CR>', { desc = 'Next list item' })
 vim.keymap.set('n', '<A-i>', '<cmd>lprev<CR>', { desc = 'Prev list item' })
+vim.keymap.set('n', '<leader>yp', function()
+  local path = vim.fn.expand '%:p'
+  vim.fn.setreg('+', path)
+  vim.notify('Copied path: ' .. path)
+end, { desc = '[Y]ank buffer [P]ath' })
 vim.keymap.set(
   'n',
   '<leader>td',
@@ -175,6 +180,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
+        { '<leader>y', group = '[Y]ank' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
       },
