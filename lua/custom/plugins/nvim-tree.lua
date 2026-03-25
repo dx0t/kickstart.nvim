@@ -8,5 +8,11 @@ return {
   dependencies = {
     'nvim-tree/nvim-web-devicons',
   },
-  config = function() require('nvim-tree').setup {} end,
+  config = function()
+    require('nvim-tree').setup {
+      hijack_directories = {
+        auto_open = false,
+      },
+    }
+  end,
 }

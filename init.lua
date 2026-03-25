@@ -77,6 +77,7 @@ vim.diagnostic.config {
 -- Custom shortcuts
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.keymap.set('n', '<leader>tt', '<cmd>botright 10split | terminal<CR>', { desc = 'Open [T]erminal split' })
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
@@ -107,6 +108,26 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function() vim.hl.on_yank() end,
+})
+
+vim.api.nvim_create_autocmd('VimEnter', {
+  desc = 'Show the built-in welcome screen on empty startup',
+  group = vim.api.nvim_create_augroup('kickstart-startup-intro', { clear = true }),
+  once = true,
+  callback = function()
+    if vim.fn.argc() ~= 0 then return end
+
+    vim.schedule(function()
+      local buf = vim.api.nvim_get_current_buf()
+      if not vim.api.nvim_buf_is_valid(buf) then return end
+      if vim.bo[buf].buftype ~= '' or vim.api.nvim_buf_get_name(buf) ~= '' then return end
+      if vim.api.nvim_buf_line_count(buf) > 1 or vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] ~= '' then return end
+
+      vim.cmd 'silent only'
+      vim.cmd 'silent intro'
+      vim.cmd 'redraw'
+    end)
+  end,
 })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -666,26 +687,15 @@ require('lazy').setup({
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+  {
+    'Mofiqul/vscode.nvim',
+    priority = 1000,
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        style = 'night',
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
+      require('vscode').setup {
+        italic_comments = false,
       }
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'vscode'
     end,
   },
 
