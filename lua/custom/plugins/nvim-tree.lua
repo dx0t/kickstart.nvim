@@ -13,6 +13,9 @@ return {
       hijack_directories = {
         auto_open = false,
       },
+      update_focused_file = {
+        enable = true,
+      },
     }
   end,
 }
