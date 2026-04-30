@@ -23,6 +23,9 @@ vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 
 -- Enable break indent
 vim.o.breakindent = true
+vim.o.wrap = false
+vim.o.sidescroll = 1
+vim.o.sidescrolloff = 8
 
 -- Enable undo/redo changes even after closing and reopening a file
 vim.o.undofile = true
@@ -48,6 +51,7 @@ vim.o.splitbelow = true
 vim.o.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 vim.opt.fillchars:append { diff = ' ' }
+vim.opt.diffopt:append { 'algorithm:histogram', 'indent-heuristic', 'linematch:60' }
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
