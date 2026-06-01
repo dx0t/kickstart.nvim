@@ -40,6 +40,7 @@ return {
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
+    local mason_path = vim.fn.stdpath 'data' .. '/mason'
 
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
@@ -55,6 +56,103 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'js-debug-adapter',
+        'netcoredbg',
+      },
+    }
+
+    dap.adapters['pwa-node'] = {
+      type = 'server',
+      host = 'localhost',
+      port = '${port}',
+      executable = {
+        command = 'node',
+        args = {
+          mason_path .. '/packages/js-debug-adapter/js-debug/src/dapDebugServer.js',
+          '${port}',
+        },
+      },
+    }
+
+    for _, language in ipairs { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact' } do
+      dap.configurations[language] = {
+        {
+          type = 'pwa-node',
+          request = 'launch',
+          name = 'Launch current file',
+          program = '${file}',
+          cwd = '${workspaceFolder}',
+          sourceMaps = true,
+          protocol = 'inspector',
+          console = 'integratedTerminal',
+        },
+        {
+          type = 'pwa-node',
+          request = 'attach',
+          name = 'Attach to Node process',
+          processId = require('dap.utils').pick_process,
+          cwd = '${workspaceFolder}',
+          sourceMaps = true,
+        },
+      }
+    end
+
+    local netcoredbg_path = mason_path .. '/packages/netcoredbg/libexec/netcoredbg/netcoredbg'
+    if vim.fn.executable(netcoredbg_path) == 0 then netcoredbg_path = mason_path .. '/packages/netcoredbg/netcoredbg' end
+
+    dap.adapters.coreclr = {
+      type = 'executable',
+      command = netcoredbg_path,
+      args = { '--interpreter=vscode' },
+    }
+
+    dap.configurations.cs = {
+      {
+        type = 'coreclr',
+        name = 'Launch .NET DLL',
+        request = 'launch',
+        program = function()
+          return vim.fn.input('Path to dll: ', vim.fn.getcwd() .. '/bin/Debug/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopAtEntry = false,
+      },
+      {
+        type = 'coreclr',
+        name = 'Debug xUnit test by name',
+        request = 'attach',
+        processId = function()
+          local test_name = vim.fn.input 'Test name: '
+          local test_project = vim.fs.find(function(name) return name:match '%.csproj$' end, {
+            path = vim.fn.expand '%:p:h',
+            upward = true,
+          })[1]
+
+          if not test_project then test_project = vim.fn.input('Test project: ', vim.fn.getcwd() .. '/', 'file') end
+
+          local log_file = vim.fn.tempname()
+          local command = string.format(
+            'VSTEST_HOST_DEBUG=1 dotnet test %s --no-build --filter %s > %s 2>&1 &',
+            vim.fn.shellescape(test_project),
+            vim.fn.shellescape('FullyQualifiedName~' .. test_name),
+            vim.fn.shellescape(log_file)
+          )
+
+          vim.fn.system(command)
+          vim.notify('Started dotnet test for ' .. vim.fn.fnamemodify(test_project, ':t') .. '. Log: ' .. log_file)
+
+          for _ = 1, 100 do
+            local output = vim.fn.filereadable(log_file) == 1 and table.concat(vim.fn.readfile(log_file), '\n') or ''
+            local pid = output:match '[Pp]rocess [Ii]d:%s*(%d+)'
+            if pid then return tonumber(pid) end
+            vim.uv.sleep(100)
+          end
+
+          vim.notify('Could not find waiting testhost PID. See log: ' .. log_file, vim.log.levels.ERROR)
+          return require('dap.utils').pick_process()
+        end,
+        cwd = '${workspaceFolder}',
+        stopAtEntry = false,
       },
     }
 
