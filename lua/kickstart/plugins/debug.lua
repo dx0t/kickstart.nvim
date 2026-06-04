@@ -106,7 +106,91 @@ return {
       args = { '--interpreter=vscode' },
     }
 
+    local dotnet_launch = nil
+
+    local function resolve_dotnet_launch()
+      local project = vim.fs.find(function(name) return name:match '%.csproj$' end, {
+        path = vim.fn.expand '%:p:h',
+        upward = true,
+      })[1]
+
+      if not project then project = vim.fn.input('Project file: ', vim.fn.getcwd() .. '/', 'file') end
+
+      local project_dir = vim.fs.dirname(project)
+      local project_name = vim.fn.fnamemodify(project, ':t:r')
+      local dlls = vim.fn.glob(project_dir .. '/bin/Debug/*/' .. project_name .. '.dll', false, true)
+
+      local program = nil
+      for _, dll in ipairs(dlls) do
+        local runtimeconfig = dll:gsub('%.dll$', '.runtimeconfig.json')
+        if vim.fn.filereadable(runtimeconfig) == 1 then
+          program = dll
+          break
+        end
+      end
+
+      if not program then
+        project = vim.fn.input('Startup project: ', project, 'file')
+        project_dir = vim.fs.dirname(project)
+        project_name = vim.fn.fnamemodify(project, ':t:r')
+        dlls = vim.fn.glob(project_dir .. '/bin/Debug/*/' .. project_name .. '.dll', false, true)
+
+        for _, dll in ipairs(dlls) do
+          local runtimeconfig = dll:gsub('%.dll$', '.runtimeconfig.json')
+          if vim.fn.filereadable(runtimeconfig) == 1 then
+            program = dll
+            break
+          end
+        end
+      end
+
+      if not program then program = vim.fn.input('Path to dll: ', project_dir .. '/bin/Debug/', 'file') end
+      local env = {}
+
+      local launch_settings = project_dir .. '/Properties/launchSettings.json'
+      if vim.fn.filereadable(launch_settings) == 1 then
+        local ok, settings = pcall(vim.json.decode, table.concat(vim.fn.readfile(launch_settings), '\n'))
+        local profiles = ok and settings.profiles or nil
+
+        if profiles then
+          local names = vim.tbl_keys(profiles)
+          table.sort(names)
+          table.insert(names, 1, 'none')
+
+          local choices = { 'Select launch profile:' }
+          for index, name in ipairs(names) do
+            choices[#choices + 1] = string.format('%d. %s', index, name)
+          end
+
+          local selected = names[vim.fn.inputlist(choices)]
+          local profile = selected and profiles[selected]
+
+          if profile then
+            env = vim.tbl_extend('force', env, profile.environmentVariables or {})
+            if profile.applicationUrl then env.ASPNETCORE_URLS = profile.applicationUrl end
+          end
+        end
+      end
+
+      dotnet_launch = {
+        program = program,
+        cwd = project_dir,
+        env = env,
+      }
+
+      return dotnet_launch
+    end
+
     dap.configurations.cs = {
+      {
+        type = 'coreclr',
+        name = 'Launch .NET project DLL',
+        request = 'launch',
+        program = function() return resolve_dotnet_launch().program end,
+        cwd = function() return dotnet_launch and dotnet_launch.cwd or vim.fn.getcwd() end,
+        env = function() return dotnet_launch and dotnet_launch.env or {} end,
+        stopAtEntry = false,
+      },
       {
         type = 'coreclr',
         name = 'Launch .NET DLL',
