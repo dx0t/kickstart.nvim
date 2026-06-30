@@ -91,6 +91,7 @@ vim.keymap.set('n', '<A-j>', '<cmd>cnext<CR>', { desc = 'Go to next item in quic
 vim.keymap.set('n', '<A-k>', '<cmd>cprev<CR>', { desc = 'Go to prev item in quicklist' })
 vim.keymap.set('n', '<A-u>', '<cmd>lnext<CR>', { desc = 'Next list item' })
 vim.keymap.set('n', '<A-i>', '<cmd>lprev<CR>', { desc = 'Prev list item' })
+vim.keymap.set('n', '<leader>rm', '<cmd>keeppatterns %s/\r$//e<CR>', { desc = '[R]emove ^[M] from current buffer' })
 vim.keymap.set('n', '<leader>yp', function()
   local path = vim.fn.expand '%:p'
   vim.fn.setreg('+', path)
