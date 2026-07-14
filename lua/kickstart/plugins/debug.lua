@@ -34,6 +34,7 @@ return {
     { '<F3>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
     { '<leader>b', function() require('dap').toggle_breakpoint() end, desc = 'Debug: Toggle Breakpoint' },
     { '<leader>B', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, desc = 'Debug: Set Breakpoint' },
+    { '<leader>de', function() require('dap').toggle_exception_breakpoints() end, desc = 'Debug: Toggle Exception Breakpoints' },
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     { '<F7>', function() require('dapui').toggle() end, desc = 'Debug: See last session result.' },
   },
@@ -105,6 +106,19 @@ return {
       command = netcoredbg_path,
       args = { '--interpreter=vscode' },
     }
+
+    dap.defaults.coreclr.exception_breakpoints = {}
+
+    function dap.toggle_exception_breakpoints()
+      local enabled = not vim.g.dap_exception_breakpoints_enabled
+      vim.g.dap_exception_breakpoints_enabled = enabled
+
+      local filters = enabled and { 'user-unhandled' } or {}
+      dap.defaults.coreclr.exception_breakpoints = filters
+      dap.set_exception_breakpoints(filters)
+
+      vim.notify('Just My Code exception breakpoints ' .. (enabled and 'enabled' or 'disabled'))
+    end
 
     local dotnet_launch = nil
 
@@ -190,6 +204,7 @@ return {
         cwd = function() return dotnet_launch and dotnet_launch.cwd or vim.fn.getcwd() end,
         env = function() return dotnet_launch and dotnet_launch.env or {} end,
         stopAtEntry = false,
+        justMyCode = true,
       },
       {
         type = 'coreclr',
@@ -200,6 +215,7 @@ return {
         end,
         cwd = '${workspaceFolder}',
         stopAtEntry = false,
+        justMyCode = true,
       },
       {
         type = 'coreclr',
@@ -237,6 +253,7 @@ return {
         end,
         cwd = '${workspaceFolder}',
         stopAtEntry = false,
+        justMyCode = true,
       },
     }
 
