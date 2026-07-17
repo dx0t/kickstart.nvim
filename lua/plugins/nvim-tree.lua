@@ -10,6 +10,9 @@ return {
   },
   config = function()
     require('nvim-tree').setup {
+      view = {
+        width = 80,
+      },
       hijack_directories = {
         auto_open = false,
       },

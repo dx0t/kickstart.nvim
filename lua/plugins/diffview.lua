@@ -44,6 +44,9 @@ return {
     end
 
     return {
+      file_panel = {
+        width = 80,
+      },
       keymaps = {
         view = {
           { 'n', '<leader>hs', function() update_index_hunk(RevType.LOCAL) end, { desc = 'git [s]tage hunk' } },
